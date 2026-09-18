@@ -1,0 +1,5 @@
+node_modules/
+Portfolio/node_modules/
+Portfolio/dist/
+Portfolio/*.tsbuildinfo
+Portfolio/*.d.ts

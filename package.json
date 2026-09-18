@@ -1,9 +1,13 @@
 {
   "name": "portfolio-workspace",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "npm --prefix Portfolio run dev",
     "build": "npm --prefix Portfolio run build",
-    "preview": "npm --prefix Portfolio run preview"
+    "preview": "npm --prefix Portfolio run preview",
+    "postinstall": "npm --prefix Portfolio install"
   }
 }

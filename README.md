@@ -102,6 +102,12 @@ npm run build
 
 The root `package.json` forwards commands to the application in `Portfolio/`.
 
+## Deployment
+
+The repository includes `vercel.json` for Vercel deployment. Import the repository with the project root left unchanged; Vercel will install the nested app dependencies, run `npm run build`, and publish `Portfolio/dist`.
+
+The same build output can be deployed to any static host using `Portfolio/dist` as the publish directory.
+
 ## Project Structure
 
 ```text
@@ -117,6 +123,7 @@ Portfolio/
     │   ├── main.tsx          # React entry point
     │   └── vite-env.d.ts
     ├── profile.png           # Local portrait
+    ├── public/livo-demo.mp4  # Web-optimized LIVO demo video
     ├── resume.pdf            # Resume download
     ├── tailwind.config.js
     ├── postcss.config.js
