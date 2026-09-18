@@ -98,6 +98,20 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
 .section-kicker, .eyebrow { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(239, 238, 233, 0.5); }
 .display-title { max-width: 48rem; margin-top: 1.25rem; font-size: clamp(2.5rem, 6vw, 6.5rem); line-height: 0.92; letter-spacing: -0.02em; }
 .body-copy { max-width: 42rem; margin-top: 2.5rem; color: rgba(239, 238, 233, 0.72); font-size: clamp(1rem, 1.5vw, 1.3rem); line-height: 1.55; }
+.motion-model { --tilt-x: 0deg; --tilt-y: 0deg; --pointer-x: 0px; --pointer-y: 0px; position: relative; min-height: 26rem; overflow: hidden; border: 1px solid rgba(239, 238, 233, 0.35); background: #171717; cursor: crosshair; perspective: 48rem; transform: perspective(48rem) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transform-style: preserve-3d; transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1); }
+.motion-model-grid { position: absolute; inset: 0; opacity: 0.4; background-image: linear-gradient(rgba(239, 238, 233, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(239, 238, 233, 0.08) 1px, transparent 1px); background-size: 2rem 2rem; transform: perspective(30rem) rotateX(58deg) scale(1.4) translate3d(var(--pointer-x), calc(4rem + var(--pointer-y)), 0); transform-origin: center bottom; transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1); }
+.motion-path { position: absolute; height: 1px; background: #efeee9; transform-origin: left center; opacity: 0.65; }
+.motion-path::after { content: ''; position: absolute; right: 0; top: -0.18rem; width: 0.35rem; height: 0.35rem; background: #efeee9; }
+.motion-path-one { top: 45%; left: 17%; width: 68%; transform: rotate(-25deg); animation: model-path-one 4.5s ease-in-out infinite alternate; }
+.motion-path-two { top: 67%; left: 17%; width: 61%; transform: rotate(25deg); animation: model-path-two 4.5s ease-in-out infinite alternate-reverse; }
+@keyframes model-path-one { from { transform: rotate(-25deg) scaleX(0.72); opacity: 0.35; } to { transform: rotate(-25deg) scaleX(1); opacity: 0.85; } }
+@keyframes model-path-two { from { transform: rotate(25deg) scaleX(1); opacity: 0.85; } to { transform: rotate(25deg) scaleX(0.72); opacity: 0.35; } }
+.motion-node { position: absolute; display: grid; width: 4.5rem; height: 4.5rem; place-items: center; border: 1px solid rgba(239, 238, 233, 0.72); background: #171717; animation: model-node 3.8s ease-in-out infinite alternate; transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1); transform-style: preserve-3d; }
+.motion-node span { color: rgba(239, 238, 233, 0.45); font-size: 0.6rem; }
+.motion-node b { font-size: 0.7rem; font-weight: 400; letter-spacing: 0.12em; }
+.motion-node-one { top: 28%; left: 10%; transform: translate3d(calc(var(--pointer-x) * 0.7), calc(var(--pointer-y) * 0.7), 2rem); }.motion-node-two { top: 44%; right: 12%; animation-delay: 500ms; transform: translate3d(calc(var(--pointer-x) * -0.8), calc(var(--pointer-y) * -0.8), 4rem); }.motion-node-three { bottom: 10%; left: 30%; animation-delay: 1s; transform: translate3d(calc(var(--pointer-x) * 0.45), calc(var(--pointer-y) * 0.45), 1rem); }
+@keyframes model-node { from { transform: translateY(0); } to { transform: translateY(-0.7rem); } }
+.motion-model-label { position: absolute; right: 1rem; bottom: 1rem; color: rgba(239, 238, 233, 0.45); font-size: 0.6rem; letter-spacing: 0.2em; transform: translate3d(calc(var(--pointer-x) * -0.25), calc(var(--pointer-y) * -0.25), 3rem); transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1); }
 .about-portrait { position: relative; width: min(100%, 18rem); height: 24rem; overflow: hidden; background: #282828; }
 .about-portrait::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.72)); }
 .about-portrait img { width: 100%; height: 100%; object-fit: contain; object-position: bottom; filter: grayscale(1); opacity: 0.86; transition: transform 800ms cubic-bezier(0.22, 1, 0.36, 1), filter 600ms ease; }
@@ -153,6 +167,9 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
   .about-interactive::before, .about-pulse::after { animation: none; }
   .certificate-slider::before { animation: none; }
   .architecture-node { animation: none; }
+  .motion-path-one, .motion-path-two, .motion-node { animation: none; }
+  .motion-model { transform: none; }
+  .motion-model-grid, .motion-node-one, .motion-node-two, .motion-node-three, .motion-model-label { transform: none; }
 }
 
 @media (max-width: 640px) {
@@ -166,4 +183,5 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
   .project-video { min-height: 16rem; }
   .experience-entry { grid-template-columns: 1fr; gap: 0; }
   .experience-entry .timeline-row { min-height: auto; border-left: 0; padding: 1.25rem 0 1.5rem; }
+  .motion-model { min-height: 20rem; }
 }

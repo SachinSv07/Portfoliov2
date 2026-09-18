@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type PointerEvent } from 'react'
 import { X } from 'lucide-react'
 
 const portraitImage = '/profile.png'
@@ -46,6 +46,25 @@ function App() {
   const [activeStep, setActiveStep] = useState(0)
   const [copied, setCopied] = useState(false)
 
+  const moveMotionModel = (event: PointerEvent<HTMLDivElement>) => {
+    const model = event.currentTarget
+    const bounds = model.getBoundingClientRect()
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5
+    model.style.setProperty('--tilt-x', `${y * -10}deg`)
+    model.style.setProperty('--tilt-y', `${x * 12}deg`)
+    model.style.setProperty('--pointer-x', `${x * 18}px`)
+    model.style.setProperty('--pointer-y', `${y * 18}px`)
+  }
+
+  const resetMotionModel = (event: PointerEvent<HTMLDivElement>) => {
+    const model = event.currentTarget
+    model.style.setProperty('--tilt-x', '0deg')
+    model.style.setProperty('--tilt-y', '0deg')
+    model.style.setProperty('--pointer-x', '0px')
+    model.style.setProperty('--pointer-y', '0px')
+  }
+
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -84,7 +103,7 @@ function App() {
         <div className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-500 sm:hidden ${drawerOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`} onClick={() => setDrawerOpen(false)}><aside className={`absolute right-0 top-0 h-full w-[80%] max-w-sm bg-[#141414] px-8 py-10 transition-transform duration-[600ms] [transition-timing-function:cubic-bezier(0.76,0,0.24,1)] ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`} onClick={(event) => event.stopPropagation()}><button type="button" className="absolute right-6 top-6" aria-label="Close menu" onClick={() => setDrawerOpen(false)}><X size={26} strokeWidth={1.5} /></button><p className="mt-16 text-xs uppercase tracking-[0.2em] text-cream/50">Site Index</p><nav className="mt-5 flex flex-col gap-1">{navLinks.map(([label, href]) => <Link key={label} href={href} className="text-4xl" >{label}</Link>)}</nav><p className="mt-16 text-xs uppercase tracking-[0.2em] text-cream/50">Find Me</p><nav className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm">{socialLinks.map(([label, href]) => <Link key={label} href={href}>{label}</Link>)}</nav></aside></div>
       </section>
 
-      <section id="about" className="page-section border-t border-cream/30 px-6 py-24 sm:px-10 sm:py-32"><div className="mx-auto max-w-7xl"><div data-reveal className="reveal-item"><p className="section-kicker">01 / About</p><p className="eyebrow mt-12">More than just code.</p><h2 className="display-title">I turn ideas into working software.</h2><p className="body-copy">I am a Computer Science & Engineering student who enjoys turning ideas into working software. I work across frontend development, backend systems, APIs, databases, and AI-powered applications.</p><p className="body-copy mt-6">Problem <span className="text-cream/40">→</span> Architecture <span className="text-cream/40">→</span> Development <span className="text-cream/40">→</span> Testing <span className="text-cream/40">→</span> Deployment</p><Link href="/resume.pdf" className="mt-10 inline-block border-b border-cream pb-2 text-sm">View Resume</Link></div></div></section>
+      <section id="about" className="page-section border-t border-cream/30 px-6 py-24 sm:px-10 sm:py-32"><div className="mx-auto max-w-7xl"><p data-reveal className="reveal-item section-kicker">01 / About</p><div className="mt-14 grid gap-16 lg:grid-cols-[1fr_0.8fr] lg:items-center"><div data-reveal className="reveal-item"><p className="eyebrow">More than just code.</p><h2 className="display-title">I turn ideas into working software.</h2><p className="body-copy">I am a Computer Science & Engineering student who enjoys turning ideas into working software. I work across frontend development, backend systems, APIs, databases, and AI-powered applications.</p><p className="body-copy mt-6">Problem <span className="text-cream/40">→</span> Architecture <span className="text-cream/40">→</span> Development <span className="text-cream/40">→</span> Testing <span className="text-cream/40">→</span> Deployment</p><Link href="/resume.pdf" className="mt-10 inline-block border-b border-cream pb-2 text-sm">View Resume</Link></div><div data-reveal className="reveal-item reveal-delay-1" aria-label="Interactive 3D software development motion model" role="img"><div className="motion-model" onPointerMove={moveMotionModel} onPointerLeave={resetMotionModel}><div className="motion-model-grid" /><div className="motion-path motion-path-one" /><div className="motion-path motion-path-two" /><div className="motion-node motion-node-one"><span>01</span><b>IDEA</b></div><div className="motion-node motion-node-two"><span>02</span><b>BUILD</b></div><div className="motion-node motion-node-three"><span>03</span><b>SHIP</b></div><div className="motion-model-label">MOVE / TO EXPLORE</div></div></div></div></div></section>
 
       <section id="stack" className="page-section border-t border-cream/30 px-6 py-24 sm:px-10 sm:py-32"><div className="mx-auto max-w-7xl"><p data-reveal className="reveal-item section-kicker">02 / Tech Stack</p><div className="mt-14 grid gap-12 lg:grid-cols-[0.7fr_1.3fr]"><div data-reveal className="reveal-item"><p className="eyebrow">What I use to build</p><h2 className="display-title">A toolkit that moves with the problem.</h2><div className="mt-10 flex gap-3"><button type="button" className="slider-control" onClick={() => setStackIndex((stackIndex + stackGroups.length - 1) % stackGroups.length)}>Prev</button><button type="button" className="slider-control" onClick={() => setStackIndex((stackIndex + 1) % stackGroups.length)}>Next</button></div></div><div data-reveal className="reveal-item reveal-delay-1 stack-stage"><p className="text-xs uppercase tracking-[0.2em] text-cream/45">0{stackIndex + 1} / 0{stackGroups.length}</p><h3 className="mt-8 text-5xl sm:text-7xl">{stackGroups[stackIndex][0]}</h3><div className="mt-8 flex max-w-2xl flex-wrap gap-x-5 gap-y-3">{stackGroups[stackIndex][1].map((item) => <span key={item} className="stack-word">{item}</span>)}</div><div className="mt-16 h-px bg-cream/30"><div className="h-px bg-cream transition-all duration-700" style={{ width: `${((stackIndex + 1) / stackGroups.length) * 100}%` }} /></div></div></div></div></section>
 
@@ -94,7 +113,7 @@ function App() {
 
       <section id="achievements" className="page-section border-t border-cream/30 px-6 py-24 sm:px-10 sm:py-32"><div className="mx-auto max-w-7xl"><p data-reveal className="reveal-item section-kicker">06 / Hackathons & Achievements</p><div className="achievement-track mt-14">{achievements.map((achievement, index) => <div data-reveal key={achievement} className={`reveal-item reveal-delay-${Math.min(index + 1, 4)} achievement-item`}><span>0{index + 1}</span><h3>{achievement}</h3><p>Technical event / project participation</p></div>)}</div></div></section>
 
-      <section id="certifications" className="page-section border-t border-cream/30 px-6 py-24 sm:px-10 sm:py-32"><div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.8fr_1.2fr]"><p data-reveal className="reveal-item section-kicker">07 / Certifications & Learning</p><div data-reveal className="reveal-item certificate-slider"><p className="text-xs uppercase tracking-[0.2em] text-cream/45">0{activeCertificate + 1} / 0{certificates.length}</p><h2 className="mt-8 text-4xl sm:text-6xl">{certificates[activeCertificate]}</h2><p className="mt-6 max-w-xl text-sm leading-relaxed text-cream/60">A learning milestone in the ongoing practice of software development.</p><div className="mt-10 flex gap-6"><button type="button" className="slider-control" onClick={() => setActiveCertificate((activeCertificate + certificates.length - 1) % certificates.length)}>Previous</button><button type="button" className="slider-control" onClick={() => setActiveCertificate((activeCertificate + 1) % certificates.length)}>Next</button></div></div></div></section>
+      <section id="certifications" className="page-section border-t border-cream/30 px-6 py-24 sm:px-10 sm:py-32"><div className="mx-auto max-w-7xl"><p data-reveal className="reveal-item section-kicker">07 / Certifications & Learning</p><div data-reveal className="reveal-item certificate-slider mt-14"><p className="text-xs uppercase tracking-[0.2em] text-cream/45">0{activeCertificate + 1} / 0{certificates.length}</p><h2 className="mt-8 text-4xl sm:text-6xl">{certificates[activeCertificate]}</h2><p className="mt-6 max-w-xl text-sm leading-relaxed text-cream/60">A learning milestone in the ongoing practice of software development.</p><div className="mt-10 flex gap-6"><button type="button" className="slider-control" onClick={() => setActiveCertificate((activeCertificate + certificates.length - 1) % certificates.length)}>Previous</button><button type="button" className="slider-control" onClick={() => setActiveCertificate((activeCertificate + 1) % certificates.length)}>Next</button></div></div></div></section>
 
       <section id="build" className="page-section border-t border-cream/30 px-6 py-24 sm:px-10 sm:py-32"><div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.8fr_1.2fr]"><div><p data-reveal className="reveal-item section-kicker">08 / How I Build</p><h2 data-reveal className="reveal-item reveal-delay-1 display-title mt-12">From idea to working software.</h2></div><div className="build-steps">{buildSteps.map(([number, title, text], index) => <button type="button" key={number} onClick={() => setActiveStep(index)} className={`build-step ${activeStep === index ? 'is-active' : ''}`}><span>{number}</span><strong>{title}</strong><p>{text}</p></button>)}</div></div></section>
 
