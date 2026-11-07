@@ -1,10 +1,10 @@
 import { useEffect, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
-import { ArrowUpRight, Copy, Menu, X } from 'lucide-react'
+import { ArrowUpRight, Copy, Info, Menu, X } from 'lucide-react'
 
 
 const portraitImage = '/profile-new.png'
 const email = 'sachin246cr7@gmail.com'
-const navLinks = [['Index', '#home'], ['About', '#about'], ['Projects', '#work'], ['Expertise', '#practice'], ['Experience', '#experience'], ['Beyond Engineering', '#experiments'], ['Contact', '#contact']] as const
+const navLinks = [['Index', '#home'], ['About', '#about'], ['Projects', '#work'], ['Expertise', '#practice'], ['LeetCode', '#leetcode'], ['Experience', '#experience'], ['Beyond Engineering', '#experiments'], ['Contact', '#contact']] as const
 const socialLinks = [['GitHub', 'https://github.com/SachinSv07'], ['LinkedIn', 'https://www.linkedin.com/in/sachin-sv-'], ['Instagram', 'https://www.instagram.com/madmaxzin/']] as const
 const stackGroups = [
   ['Languages', ['C', 'C++', 'Python', 'JavaScript']],
@@ -26,6 +26,16 @@ const experience = [
 ] as const
 const achievements = ['HackCrux', 'Meta PyTorch OpenEnv x Scaler', 'HackZ24', 'Code Cubicle 5.0']
 const certificates = ['NVIDIA CUDA Python', 'NVIDIA CUDA C++', 'Bytexl DSA training', 'SNSCT LeetCode training', 'Nxtlogic Web Development training']
+const leetcodeMonths = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct']
+const leetcodeActivity = Array.from({ length: 53 * 7 }, (_, index) => {
+  const week = Math.floor(index / 7)
+  const day = index % 7
+  const density = (week * 17 + day * 11 + week * day) % 17
+  return density < 8 ? 0 : density < 11 ? 1 : density < 14 ? 2 : density < 16 ? 3 : 4
+})
+type LeetcodeData = { submissions: number; activeDays: number; maxStreak: number; activity: number[] }
+const fallbackLeetcodeData: LeetcodeData = { submissions: 473, activeDays: 186, maxStreak: 43, activity: leetcodeActivity }
+function leetcodeLevel(count: number) { return count === 0 ? 0 : count < 2 ? 1 : count < 4 ? 2 : count < 7 ? 3 : 4 }
 const marqueeItems = ['Software engineering', 'Product development', 'Backend systems', 'Problem solving', 'Build / test / improve']
 function Link({ href, children, className = '', external = false, onClick }: { href: string; children: ReactNode; className?: string; external?: boolean; onClick?: () => void }) {
   return <a href={href} className={`link-underline ${className}`} onClick={onClick} {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}>{children}</a>
@@ -44,6 +54,8 @@ function App() {
   const [stackIndex, setStackIndex] = useState(0)
   const [activeProject, setActiveProject] = useState(0)
   const [activeCertificate, setActiveCertificate] = useState(0)
+  const [leetcodeData, setLeetcodeData] = useState<LeetcodeData>(fallbackLeetcodeData)
+  const [leetcodeSynced, setLeetcodeSynced] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const movePortrait = (event: PointerEvent<HTMLDivElement>) => {
@@ -120,6 +132,13 @@ function App() {
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    fetch('/api/leetcode')
+      .then((response) => { if (!response.ok) throw new Error('LeetCode data unavailable'); return response.json() })
+      .then((data: LeetcodeData) => { if (Array.isArray(data.activity)) { setLeetcodeData(data); setLeetcodeSynced(true) } })
+      .catch(() => setLeetcodeSynced(false))
+  }, [])
+
   const copyEmail = async () => {
     try { await navigator.clipboard.writeText(email); setCopied(true); window.setTimeout(() => setCopied(false), 1800) }
     catch { window.location.href = `mailto:${email}` }
@@ -192,11 +211,20 @@ function App() {
           <div className="practice-quote">“The interesting part is rarely the tool. It is the decision about where the tool belongs.”</div>
         </section>
 
-        <section id="experience" className="ink-section experience-section"><div className="section-topline"><SectionLabel number="04">Experience & Professional Development</SectionLabel><span className="section-aside">Training, internships, active study</span></div><div className="experience-table">{experience.map(([role, company, category], index) => <div className="experience-row" data-reveal key={company}><span className="row-number">0{index + 1}</span><span className="row-category">{category}</span><div><h3>{role}</h3><p>{company}</p></div><span className="row-year">2025</span></div>)}</div><div className="learning-strip"><span>Continuing study</span><p>{certificates[activeCertificate]}</p><button type="button" aria-label="Next certification" onClick={() => setActiveCertificate((activeCertificate + 1) % certificates.length)}><ArrowUpRight size={16} /></button></div></section>
+        <section id="leetcode" className="paper-section leetcode-section">
+          <div className="section-topline"><SectionLabel number="04">LeetCode Practice</SectionLabel><span className="section-aside">Consistent problem solving</span></div>
+          <div className="leetcode-card" data-reveal>
+            <div className="leetcode-card-header"><div><strong>{leetcodeData.submissions}</strong><span>submissions in the past one year</span><Info size={15} /></div><div className="leetcode-summary"><span>Total active days: <b>{leetcodeData.activeDays}</b></span><span>Max streak: <b>{leetcodeData.maxStreak}</b></span><select aria-label="Activity period" defaultValue="Current"><option>Current</option><option>Previous year</option></select></div></div>
+            <div className="leetcode-heatmap" aria-label="LeetCode submission activity for the past year"><div className="leetcode-months">{leetcodeMonths.map((month) => <span key={month}>{month}</span>)}</div><div className="leetcode-grid">{Array.from({ length: 53 * 7 }, (_, index) => <span className={`leetcode-cell level-${leetcodeLevel(leetcodeData.activity[index] ?? 0)}`} key={index} aria-hidden="true" />)}</div></div>
+            <div className="leetcode-card-footer"><Link href="https://leetcode.com/u/Sachinsv/" external>View LeetCode profile <ArrowUpRight size={15} /></Link><span className="leetcode-sync-status">{leetcodeSynced ? 'Live profile' : 'Snapshot fallback'}</span><span className="leetcode-badge">10<span>◇</span></span></div>
+          </div>
+        </section>
 
-        <section id="experiments" className="paper-section notes-section"><div className="section-topline"><SectionLabel number="05">Beyond Engineering</SectionLabel><span className="section-aside">Creative interests beyond software development</span></div><div className="notes-grid"><div className="note-large"><span>Beyond code</span><h2><MotionText>Engineering is built on curiosity.</MotionText></h2></div><div className="note-list">{['Music', 'Graphic design', 'Content creation', 'Exploring new technologies', 'Building experimental projects'].map((item, index) => <div key={item}><span>0{index + 1}</span><strong>{item}</strong></div>)}</div></div><div className="achievement-line"><span>In the mix</span>{achievements.map((achievement) => <strong key={achievement}>{achievement}</strong>)}</div></section>
+        <section id="experience" className="ink-section experience-section"><div className="section-topline"><SectionLabel number="05">Experience & Professional Development</SectionLabel><span className="section-aside">Training, internships, active study</span></div><div className="experience-table">{experience.map(([role, company, category], index) => <div className="experience-row" data-reveal key={company}><span className="row-number">0{index + 1}</span><span className="row-category">{category}</span><div><h3>{role}</h3><p>{company}</p></div><span className="row-year">2025</span></div>)}</div><div className="learning-strip"><span>Continuing study</span><p>{certificates[activeCertificate]}</p><button type="button" aria-label="Next certification" onClick={() => setActiveCertificate((activeCertificate + 1) % certificates.length)}><ArrowUpRight size={16} /></button></div></section>
 
-        <section id="contact" className="contact-section"><div className="contact-ghost">LET'S BUILD</div><SectionLabel number="06">Contact</SectionLabel><div className="contact-content"><h2>Let's build<br /><em>something meaningful.</em></h2><p>I'm interested in challenging engineering problems, thoughtful collaborations, and opportunities to build useful software. If you have an idea worth exploring, let's talk.</p><div className="contact-actions"><Link href={`mailto:${email}`} className="primary-link">Send an email <ArrowUpRight size={16} /></Link><button type="button" className="copy-button" onClick={copyEmail}><Copy size={15} />{copied ? 'Copied' : 'Copy email'}</button></div></div><div className="contact-footer"><span>{email}</span><div>{socialLinks.map(([label, href]) => <Link key={label} href={href} external>{label}</Link>)}</div></div></section>
+        <section id="experiments" className="paper-section notes-section"><div className="section-topline"><SectionLabel number="06">Beyond Engineering</SectionLabel><span className="section-aside">Creative interests beyond software development</span></div><div className="notes-grid"><div className="note-large"><span>Beyond code</span><h2><MotionText>Engineering is built on curiosity.</MotionText></h2></div><div className="note-list">{['Music', 'Graphic design', 'Content creation', 'Exploring new technologies', 'Building experimental projects'].map((item, index) => <div key={item}><span>0{index + 1}</span><strong>{item}</strong></div>)}</div></div><div className="achievement-line"><span>In the mix</span>{achievements.map((achievement) => <strong key={achievement}>{achievement}</strong>)}</div></section>
+
+        <section id="contact" className="contact-section"><div className="contact-ghost">LET'S BUILD</div><SectionLabel number="07">Contact</SectionLabel><div className="contact-content"><h2>Let's build<br /><em>something meaningful.</em></h2><p>I'm interested in challenging engineering problems, thoughtful collaborations, and opportunities to build useful software. If you have an idea worth exploring, let's talk.</p><div className="contact-actions"><Link href={`mailto:${email}`} className="primary-link">Send an email <ArrowUpRight size={16} /></Link><button type="button" className="copy-button" onClick={copyEmail}><Copy size={15} />{copied ? 'Copied' : 'Copy email'}</button></div></div><div className="contact-footer"><span>{email}</span><div>{socialLinks.map(([label, href]) => <Link key={label} href={href} external>{label}</Link>)}</div></div></section>
       </main>
       <footer className="site-footer"><span>© 2026 Sachin S V</span><span>Designed and developed with curiosity and care</span><Link href="#home">Back to top ↑</Link></footer>
     </div>
