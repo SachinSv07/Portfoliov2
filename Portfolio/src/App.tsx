@@ -54,6 +54,7 @@ function App() {
   const [stackIndex, setStackIndex] = useState(0)
   const [activeProject, setActiveProject] = useState(0)
   const [activeCertificate, setActiveCertificate] = useState(0)
+  const [activeSection, setActiveSection] = useState('home')
   const [leetcodeData, setLeetcodeData] = useState<LeetcodeData>(fallbackLeetcodeData)
   const [leetcodeSynced, setLeetcodeSynced] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -116,19 +117,32 @@ function App() {
   useEffect(() => {
     const root = document.documentElement
     const onPointerMove = (event: globalThis.PointerEvent) => {
+      if (event.pointerType === 'touch') return
       root.style.setProperty('--cursor-x', `${event.clientX}px`)
       root.style.setProperty('--cursor-y', `${event.clientY}px`)
+      root.style.setProperty('--cursor-visible', '1')
     }
+    const onPointerLeave = () => root.style.setProperty('--cursor-visible', '0')
     window.addEventListener('pointermove', onPointerMove)
-    return () => window.removeEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerleave', onPointerLeave)
+    return () => { window.removeEventListener('pointermove', onPointerMove); window.removeEventListener('pointerleave', onPointerLeave) }
   }, [])
 
   useEffect(() => {
     const items = document.querySelectorAll<HTMLElement>('[data-reveal]')
     const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
       if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target) }
-    }), { threshold: 0.14 })
+    }), { threshold: 0.14, rootMargin: '0px 0px -10% 0px' })
     items.forEach((item) => observer.observe(item))
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const sections = document.querySelectorAll<HTMLElement>('main > section[id]')
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+      if (entry.isIntersecting) setActiveSection(entry.target.id)
+    }), { rootMargin: '-35% 0px -55% 0px', threshold: 0 })
+    sections.forEach((section) => observer.observe(section))
     return () => observer.disconnect()
   }, [])
 
@@ -146,16 +160,15 @@ function App() {
 
   const project = projects[activeProject]
   const displayLeetcodeMonths = leetcodeData.months.length ? leetcodeData.months : leetcodeMonths
-  const hasLeetcodeMonthBoundary = (week: number) => displayLeetcodeMonths.some((month) => month.column === week + 2)
 
   return (
     <div className="site-shell">
       <div className="scroll-progress" aria-hidden="true" />
-      <div className="motion-cursor" aria-hidden="true" />
+      <div className="motion-cursor" aria-hidden="true"><span className="motion-cursor-core" /><span className="motion-cursor-halo" /></div>
       <header className="site-header">
         <Link href="#home" className="brand-mark">Sachin S V<span></span></Link>
         <div className="header-meta"><span>Software Engineer</span><span className="status-dot">Available for interesting problems</span></div>
-        <nav className="desktop-nav" aria-label="Primary navigation">{navLinks.slice(1, 4).map(([label, href]) => <Link key={label} href={href}>{label}</Link>)}</nav>
+        <nav className="desktop-nav" aria-label="Primary navigation">{navLinks.slice(1, 4).map(([label, href]) => <Link key={label} href={href} className={activeSection === href.slice(1) ? 'is-current' : ''}>{label}</Link>)}</nav>
         <button type="button" className="menu-button" aria-label={drawerOpen ? 'Close menu' : 'Open menu'} aria-expanded={drawerOpen} onClick={() => setDrawerOpen(!drawerOpen)}>{drawerOpen ? <X size={20} /> : <Menu size={20} />}</button>
       </header>
 
@@ -191,7 +204,7 @@ function App() {
         </section>
 
         <section id="work" className="ink-section work-section">
-          <div className="section-topline"><SectionLabel number="02">Selected Projects</SectionLabel><span className="section-aside">Selected engineering work</span></div>
+          <div className="section-topline" data-reveal><SectionLabel number="02">Selected Projects</SectionLabel><span className="section-aside">Selected engineering work</span></div>
           <div className="work-layout">
             <div className="project-stage motion-stage" onPointerMove={moveProject} onPointerLeave={resetProject}>
               <div className="project-visual" data-reveal>{project.video ? <video key={project.video} src={project.video} autoPlay muted loop playsInline controls aria-label={`${project.title} demo`} /> : <div className="project-drawing"><span>{String(activeProject + 1).padStart(2, '0')}</span><div className="drawing-orbit" /><div className="drawing-line" /><b>{project.type}</b></div>}</div>
@@ -202,14 +215,14 @@ function App() {
             </div>
             <div className="project-index" data-reveal>
               <p className="index-heading">Project index</p>
-              {projects.map((item, index) => <button type="button" key={item.title} className={`project-index-row ${activeProject === index ? 'is-active' : ''}`} onClick={() => setActiveProject(index)}><span>0{index + 1}</span><strong>{item.title}</strong><small>{item.type}</small><ArrowUpRight size={16} /></button>)}
+              {projects.map((item, index) => <button type="button" key={item.title} style={{ '--row-index': index } as CSSProperties} className={`project-index-row ${activeProject === index ? 'is-active' : ''}`} onClick={() => setActiveProject(index)}><span>0{index + 1}</span><strong>{item.title}</strong><small>{item.type}</small><ArrowUpRight size={16} /></button>)}
               <p className="index-footnote">Project links are added as they become public. No invented outcomes, only work in progress and real decisions.</p>
             </div>
           </div>
         </section>
 
         <section id="practice" className="paper-section practice-section">
-          <div className="section-layout"><div><SectionLabel number="03">Technical Expertise</SectionLabel></div><div><p className="section-intro">Technologies and concepts I use to design, develop, and improve software.</p><div className="stack-tabs" role="tablist" aria-label="Technology groups">{stackGroups.map(([label], index) => <button type="button" role="tab" aria-selected={stackIndex === index} key={label} className={stackIndex === index ? 'is-active' : ''} onClick={() => setStackIndex(index)}>{label}</button>)}</div><div className="stack-display" data-reveal><span className="stack-number">0{stackIndex + 1}</span><h2>{stackGroups[stackIndex][0]}</h2><div className="stack-items">{stackGroups[stackIndex][1].map((item) => <span key={item}>{item}</span>)}</div></div></div></div>
+          <div className="section-layout" data-reveal><div><SectionLabel number="03">Technical Expertise</SectionLabel></div><div><p className="section-intro">Technologies and concepts I use to design, develop, and improve software.</p><div className="stack-tabs" role="tablist" aria-label="Technology groups">{stackGroups.map(([label], index) => <button type="button" role="tab" aria-selected={stackIndex === index} key={label} className={stackIndex === index ? 'is-active' : ''} onClick={() => setStackIndex(index)}>{label}</button>)}</div><div className="stack-display" data-reveal><span className="stack-number">0{stackIndex + 1}</span><h2>{stackGroups[stackIndex][0]}</h2><div className="stack-items">{stackGroups[stackIndex][1].map((item) => <span key={item}>{item}</span>)}</div></div></div></div>
           <div className="practice-quote">“The interesting part is rarely the tool. It is the decision about where the tool belongs.”</div>
         </section>
 
@@ -218,14 +231,14 @@ function App() {
           <div className="leetcode-card" data-reveal>
             <div className="leetcode-card-header"><div><strong>{leetcodeData.submissions}</strong><span>submissions in the past one year</span><Info size={15} /></div><div className="leetcode-summary"><span>Total active days: <b>{leetcodeData.activeDays}</b></span><span>Max streak: <b>{leetcodeData.maxStreak}</b></span><select aria-label="Activity period" defaultValue="Current"><option>Current</option><option>Previous year</option></select></div></div>
             <div className="leetcode-solved">{leetcodeData.solved.map((item) => <div key={item.difficulty}><span>{item.difficulty}</span><strong>{item.count}</strong></div>)}</div>
-            <div className="leetcode-heatmap" aria-label="LeetCode submission activity for the past year"><div className="leetcode-months">{displayLeetcodeMonths.map((month) => <span className="leetcode-month-label" style={{ '--month-width': `calc(${month.span} * 0.72rem + ${month.span - 1} * 0.22rem)` } as CSSProperties} key={`${month.label}-${month.column}`}>{month.label}</span>)}</div><div className="leetcode-grid">{Array.from({ length: 53 }, (_, week) => <span className={`leetcode-week ${hasLeetcodeMonthBoundary(week) ? 'month-gap' : ''}`} key={week}>{Array.from({ length: 7 }, (_, day) => { const index = week * 7 + day; return <span className={`leetcode-cell level-${leetcodeLevel(leetcodeData.activity[index] ?? 0)}`} key={day} aria-hidden="true" /> })}</span>)}</div></div>
+            <div className="leetcode-heatmap" aria-label="LeetCode submission activity for the past year"><div className="leetcode-month-groups">{displayLeetcodeMonths.map((month) => <div className="leetcode-month-group" key={`${month.label}-${month.column}`}><div className="leetcode-month-weeks">{Array.from({ length: month.span }, (_, localWeek) => <span className="leetcode-week" key={localWeek}>{Array.from({ length: 7 }, (_, day) => { const index = (month.column - 1 + localWeek) * 7 + day; return <span className={`leetcode-cell level-${leetcodeLevel(leetcodeData.activity[index] ?? 0)}`} key={day} aria-hidden="true" /> })}</span>)}</div><span className="leetcode-month-label">{month.label}</span></div>)}</div></div>
             <div className="leetcode-card-footer"><Link href="https://leetcode.com/u/Sachinsv/" external>View LeetCode profile <ArrowUpRight size={15} /></Link><span className="leetcode-sync-status">{leetcodeSynced ? 'Live profile' : 'Snapshot fallback'}</span><span className="leetcode-badge">10<span>◇</span></span></div>
           </div>
         </section>
 
-        <section id="experience" className="ink-section experience-section"><div className="section-topline"><SectionLabel number="05">Experience & Professional Development</SectionLabel><span className="section-aside">Training, internships, active study</span></div><div className="experience-table">{experience.map(([role, company, category], index) => <div className="experience-row" data-reveal key={company}><span className="row-number">0{index + 1}</span><span className="row-category">{category}</span><div><h3>{role}</h3><p>{company}</p></div><span className="row-year">2025</span></div>)}</div><div className="learning-strip"><span>Continuing study</span><p>{certificates[activeCertificate]}</p><button type="button" aria-label="Next certification" onClick={() => setActiveCertificate((activeCertificate + 1) % certificates.length)}><ArrowUpRight size={16} /></button></div></section>
+        <section id="experience" className="ink-section experience-section"><div className="section-topline" data-reveal><SectionLabel number="05">Experience & Professional Development</SectionLabel><span className="section-aside">Training, internships, active study</span></div><div className="experience-table">{experience.map(([role, company, category], index) => <div className="experience-row" data-reveal style={{ '--row-index': index } as CSSProperties} key={company}><span className="row-number">0{index + 1}</span><span className="row-category">{category}</span><div><h3>{role}</h3><p>{company}</p></div><span className="row-year">2025</span></div>)}</div><div className="learning-strip"><span>Continuing study</span><p>{certificates[activeCertificate]}</p><button type="button" aria-label="Next certification" onClick={() => setActiveCertificate((activeCertificate + 1) % certificates.length)}><ArrowUpRight size={16} /></button></div></section>
 
-        <section id="experiments" className="paper-section notes-section"><div className="section-topline"><SectionLabel number="06">Beyond Engineering</SectionLabel><span className="section-aside">Creative interests beyond software development</span></div><div className="notes-grid"><div className="note-large"><span>Beyond code</span><h2><MotionText>Engineering is built on curiosity.</MotionText></h2></div><div className="note-list">{['Music', 'Graphic design', 'Content creation', 'Exploring new technologies', 'Building experimental projects'].map((item, index) => <div key={item}><span>0{index + 1}</span><strong>{item}</strong></div>)}</div></div><div className="achievement-line"><span>In the mix</span>{achievements.map((achievement) => <strong key={achievement}>{achievement}</strong>)}</div></section>
+        <section id="experiments" className="paper-section notes-section"><div className="section-topline" data-reveal><SectionLabel number="06">Beyond Engineering</SectionLabel><span className="section-aside">Creative interests beyond software development</span></div><div className="notes-grid" data-reveal><div className="note-large"><span>Beyond code</span><h2><MotionText>Engineering is built on curiosity.</MotionText></h2></div><div className="note-list">{['Music', 'Graphic design', 'Content creation', 'Exploring new technologies', 'Building experimental projects'].map((item, index) => <div key={item}><span>0{index + 1}</span><strong>{item}</strong></div>)}</div></div><div className="achievement-line"><span>In the mix</span>{achievements.map((achievement) => <strong key={achievement}>{achievement}</strong>)}</div></section>
 
         <section id="contact" className="contact-section"><div className="contact-ghost">LET'S BUILD</div><SectionLabel number="07">Contact</SectionLabel><div className="contact-content"><h2>Let's build<br /><em>something meaningful.</em></h2><p>I'm interested in challenging engineering problems, thoughtful collaborations, and opportunities to build useful software. If you have an idea worth exploring, let's talk.</p><div className="contact-actions"><Link href={`mailto:${email}`} className="primary-link">Send an email <ArrowUpRight size={16} /></Link><button type="button" className="copy-button" onClick={copyEmail}><Copy size={15} />{copied ? 'Copied' : 'Copy email'}</button></div></div><div className="contact-footer"><span>{email}</span><div>{socialLinks.map(([label, href]) => <Link key={label} href={href} external>{label}</Link>)}</div></div></section>
       </main>
