@@ -26,15 +26,15 @@ const experience = [
 ] as const
 const achievements = ['HackCrux', 'Meta PyTorch OpenEnv x Scaler', 'HackZ24', 'Code Cubicle 5.0']
 const certificates = ['NVIDIA CUDA Python', 'NVIDIA CUDA C++', 'Bytexl DSA training', 'SNSCT LeetCode training', 'Nxtlogic Web Development training']
-const leetcodeMonths = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct']
+const leetcodeMonths = [{ label: 'Nov', column: 1 }, { label: 'Dec', column: 6 }, { label: 'Jan', column: 11 }, { label: 'Feb', column: 15 }, { label: 'Mar', column: 20 }, { label: 'Apr', column: 24 }, { label: 'May', column: 29 }, { label: 'Jun', column: 33 }, { label: 'Jul', column: 38 }, { label: 'Aug', column: 42 }, { label: 'Sep', column: 47 }, { label: 'Oct', column: 51 }]
 const leetcodeActivity = Array.from({ length: 53 * 7 }, (_, index) => {
   const week = Math.floor(index / 7)
   const day = index % 7
   const density = (week * 17 + day * 11 + week * day) % 17
   return density < 8 ? 0 : density < 11 ? 1 : density < 14 ? 2 : density < 16 ? 3 : 4
 })
-type LeetcodeData = { submissions: number; activeDays: number; maxStreak: number; activity: number[] }
-const fallbackLeetcodeData: LeetcodeData = { submissions: 473, activeDays: 186, maxStreak: 43, activity: leetcodeActivity }
+type LeetcodeData = { submissions: number; activeDays: number; maxStreak: number; activity: number[]; months: { label: string; column: number }[]; solved: { difficulty: string; count: number }[] }
+const fallbackLeetcodeData: LeetcodeData = { submissions: 473, activeDays: 186, maxStreak: 43, activity: leetcodeActivity, months: leetcodeMonths, solved: [{ difficulty: 'All', count: 378 }, { difficulty: 'Easy', count: 136 }, { difficulty: 'Medium', count: 180 }, { difficulty: 'Hard', count: 62 }] }
 function leetcodeLevel(count: number) { return count === 0 ? 0 : count < 2 ? 1 : count < 4 ? 2 : count < 7 ? 3 : 4 }
 const marqueeItems = ['Software engineering', 'Product development', 'Backend systems', 'Problem solving', 'Build / test / improve']
 function Link({ href, children, className = '', external = false, onClick }: { href: string; children: ReactNode; className?: string; external?: boolean; onClick?: () => void }) {
@@ -145,6 +145,9 @@ function App() {
   }
 
   const project = projects[activeProject]
+  const displayLeetcodeMonths = leetcodeData.months.length ? leetcodeData.months : leetcodeMonths
+  const leetcodeMonthByColumn = new Map(displayLeetcodeMonths.map((month) => [month.column, month.label]))
+  const hasLeetcodeMonthBoundary = (week: number) => displayLeetcodeMonths.some((month) => month.column === week + 2)
 
   return (
     <div className="site-shell">
@@ -215,7 +218,8 @@ function App() {
           <div className="section-topline"><SectionLabel number="04">LeetCode Practice</SectionLabel><span className="section-aside">Consistent problem solving</span></div>
           <div className="leetcode-card" data-reveal>
             <div className="leetcode-card-header"><div><strong>{leetcodeData.submissions}</strong><span>submissions in the past one year</span><Info size={15} /></div><div className="leetcode-summary"><span>Total active days: <b>{leetcodeData.activeDays}</b></span><span>Max streak: <b>{leetcodeData.maxStreak}</b></span><select aria-label="Activity period" defaultValue="Current"><option>Current</option><option>Previous year</option></select></div></div>
-            <div className="leetcode-heatmap" aria-label="LeetCode submission activity for the past year"><div className="leetcode-months">{leetcodeMonths.map((month) => <span key={month}>{month}</span>)}</div><div className="leetcode-grid">{Array.from({ length: 53 * 7 }, (_, index) => <span className={`leetcode-cell level-${leetcodeLevel(leetcodeData.activity[index] ?? 0)}`} key={index} aria-hidden="true" />)}</div></div>
+            <div className="leetcode-solved">{leetcodeData.solved.map((item) => <div key={item.difficulty}><span>{item.difficulty}</span><strong>{item.count}</strong></div>)}</div>
+            <div className="leetcode-heatmap" aria-label="LeetCode submission activity for the past year"><div className="leetcode-months">{Array.from({ length: 53 }, (_, week) => <span className={`leetcode-month-slot ${hasLeetcodeMonthBoundary(week) ? 'month-gap' : ''}`} key={week}>{leetcodeMonthByColumn.get(week + 1) ?? ''}</span>)}</div><div className="leetcode-grid">{Array.from({ length: 53 }, (_, week) => <span className={`leetcode-week ${hasLeetcodeMonthBoundary(week) ? 'month-gap' : ''}`} key={week}>{Array.from({ length: 7 }, (_, day) => { const index = week * 7 + day; return <span className={`leetcode-cell level-${leetcodeLevel(leetcodeData.activity[index] ?? 0)}`} key={day} aria-hidden="true" /> })}</span>)}</div></div>
             <div className="leetcode-card-footer"><Link href="https://leetcode.com/u/Sachinsv/" external>View LeetCode profile <ArrowUpRight size={15} /></Link><span className="leetcode-sync-status">{leetcodeSynced ? 'Live profile' : 'Snapshot fallback'}</span><span className="leetcode-badge">10<span>◇</span></span></div>
           </div>
         </section>

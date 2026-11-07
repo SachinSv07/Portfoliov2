@@ -26,6 +26,8 @@ function buildActivity(calendar) {
   today.setUTCHours(0, 0, 0, 0)
   const activity = []
   const counts = []
+  const months = []
+  const seenMonths = new Set()
   const firstDay = new Date(today)
   firstDay.setUTCDate(today.getUTCDate() - 364)
   firstDay.setUTCDate(firstDay.getUTCDate() - firstDay.getUTCDay())
@@ -38,6 +40,11 @@ function buildActivity(calendar) {
     const count = isInRange ? Number(calendar[String(timestamp)] ?? 0) : 0
     activity.push(count)
     if (isInRange) counts.push(count)
+    const monthKey = `${date.getUTCFullYear()}-${date.getUTCMonth()}`
+    if (date.getUTCDate() <= 7 && !seenMonths.has(monthKey)) {
+      seenMonths.add(monthKey)
+      months.push({ label: date.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }), column: Math.floor(index / 7) + 1 })
+    }
   }
 
   let maxStreak = 0
@@ -47,7 +54,7 @@ function buildActivity(calendar) {
     maxStreak = Math.max(maxStreak, currentStreak)
   })
 
-  return { activity, submissions: counts.reduce((total, count) => total + count, 0), activeDays: counts.filter(Boolean).length, maxStreak }
+  return { activity, months, submissions: counts.reduce((total, count) => total + count, 0), activeDays: counts.filter(Boolean).length, maxStreak }
 }
 
 export default async function handler(request, response) {

@@ -165,9 +165,18 @@ em { color: var(--signal); font-style: normal; }
 .leetcode-summary { display: flex; gap: 1.5rem; align-items: center; color: #aab1be; font-size: 0.78rem; }
 .leetcode-summary b { color: #e6e8ed; font-weight: 500; }
 .leetcode-summary select { appearance: none; padding: 0.55rem 2rem 0.55rem 0.8rem; border: 0; border-radius: 0.45rem; color: #c8ced9; font: inherit; background: #3a3a3a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23aab1be' stroke-width='1.5' d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E") no-repeat right 0.65rem center; }
-.leetcode-heatmap { position: relative; overflow-x: auto; margin-top: 1.3rem; padding-top: 1.8rem; }
-.leetcode-months { position: absolute; top: 0; right: 0; left: 0.1rem; display: grid; grid-template-columns: repeat(12, 1fr); color: #c9ced8; font-size: 0.95rem; }
-.leetcode-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 0.72rem); grid-auto-columns: 0.72rem; gap: 0.22rem; min-width: 46rem; }
+.leetcode-solved { display: flex; gap: 1.4rem; margin-top: 1.1rem; padding-top: 0.9rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.leetcode-solved div { display: flex; gap: 0.35rem; align-items: baseline; color: #aab1be; font-size: 0.74rem; }
+.leetcode-solved strong { color: #e6e8ed; font-weight: 500; }
+.leetcode-solved div:nth-child(2) strong { color: #7ee28c; }
+.leetcode-solved div:nth-child(3) strong { color: #f0bf68; }
+.leetcode-solved div:nth-child(4) strong { color: #ef7b83; }
+.leetcode-heatmap { position: relative; overflow-x: auto; margin-top: 1.3rem; padding-bottom: 2.15rem; }
+.leetcode-months { position: absolute; bottom: 0; left: 0.1rem; display: flex; gap: 0.22rem; min-width: 46rem; color: #c9ced8; font-size: 0.95rem; }
+.leetcode-month-slot { flex: 0 0 0.72rem; min-height: 1.1rem; white-space: nowrap; }
+.leetcode-grid { display: flex; gap: 0.22rem; min-width: 46rem; }
+.leetcode-week { display: grid; flex: 0 0 0.72rem; grid-template-rows: repeat(7, 0.72rem); gap: 0.22rem; }
+.leetcode-month-slot.month-gap, .leetcode-week.month-gap { margin-right: 1rem; }
 .leetcode-cell { display: block; border-radius: 0.18rem; background: #3a3a3a; }
 .leetcode-cell.level-1 { background: #0e6f31; }
 .leetcode-cell.level-2 { background: #0c9b3b; }
