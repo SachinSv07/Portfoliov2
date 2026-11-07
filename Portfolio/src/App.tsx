@@ -84,6 +84,23 @@ function App() {
     event.currentTarget.style.setProperty('--tilt-y', '0deg')
   }
 
+  const moveLeetcode = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'touch') return
+    const card = event.currentTarget
+    const bounds = card.getBoundingClientRect()
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5
+    card.style.setProperty('--tilt-x', `${y * -1.5}deg`)
+    card.style.setProperty('--tilt-y', `${x * 1.5}deg`)
+    card.style.setProperty('--spot-x', `${(x + 0.5) * 100}%`)
+    card.style.setProperty('--spot-y', `${(y + 0.5) * 100}%`)
+  }
+
+  const resetLeetcode = (event: PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.style.setProperty('--tilt-x', '0deg')
+    event.currentTarget.style.setProperty('--tilt-y', '0deg')
+  }
+
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -228,7 +245,7 @@ function App() {
 
         <section id="leetcode" className="paper-section leetcode-section">
           <div className="section-topline"><SectionLabel number="04">LeetCode Practice</SectionLabel><span className="section-aside">Consistent problem solving</span></div>
-          <div className="leetcode-card" data-reveal>
+          <div className="leetcode-card" data-reveal onPointerMove={moveLeetcode} onPointerLeave={resetLeetcode}>
             <div className="leetcode-card-header"><div><strong>{leetcodeData.submissions}</strong><span>submissions in the past one year</span><Info size={15} /></div><div className="leetcode-summary"><span>Total active days: <b>{leetcodeData.activeDays}</b></span><span>Max streak: <b>{leetcodeData.maxStreak}</b></span><select aria-label="Activity period" defaultValue="Current"><option>Current</option><option>Previous year</option></select></div></div>
             <div className="leetcode-solved">{leetcodeData.solved.map((item) => <div key={item.difficulty}><span>{item.difficulty}</span><strong>{item.count}</strong></div>)}</div>
             <div className="leetcode-heatmap" aria-label="LeetCode submission activity for the past year"><div className="leetcode-month-groups">{displayLeetcodeMonths.map((month) => <div className="leetcode-month-group" key={`${month.label}-${month.column}`}><div className="leetcode-month-weeks">{Array.from({ length: month.span }, (_, localWeek) => <span className="leetcode-week" key={localWeek}>{Array.from({ length: 7 }, (_, day) => { const index = (month.column - 1 + localWeek) * 7 + day; return <span className={`leetcode-cell level-${leetcodeLevel(leetcodeData.activity[index] ?? 0)}`} key={day} aria-hidden="true" /> })}</span>)}</div><span className="leetcode-month-label">{month.label}</span></div>)}</div></div>
