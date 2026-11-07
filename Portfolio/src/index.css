@@ -172,9 +172,10 @@ em { color: var(--signal); font-style: normal; }
 .leetcode-solved div:nth-child(3) strong { color: #f0bf68; }
 .leetcode-solved div:nth-child(4) strong { color: #ef7b83; }
 .leetcode-heatmap { position: relative; overflow-x: auto; margin-top: 1.3rem; padding-bottom: 2.15rem; }
-.leetcode-months { position: absolute; bottom: 0; left: 0.1rem; display: flex; gap: 0.22rem; min-width: 46rem; color: #c9ced8; font-size: 0.95rem; }
-.leetcode-month-slot { flex: 0 0 0.72rem; min-height: 1.1rem; white-space: nowrap; }
-.leetcode-grid { display: flex; gap: 0.22rem; min-width: 46rem; }
+.leetcode-months { position: absolute; bottom: 0; left: 0.1rem; display: flex; gap: 0; width: max-content; min-width: 46rem; color: #c9ced8; font-size: 0.95rem; }
+.leetcode-month-label { flex: 0 0 var(--month-width); min-height: 1.1rem; text-align: center; white-space: nowrap; }
+.leetcode-month-label:not(:last-child) { margin-right: 1.22rem; }
+.leetcode-grid { display: flex; gap: 0.22rem; width: max-content; min-width: 46rem; }
 .leetcode-week { display: grid; flex: 0 0 0.72rem; grid-template-rows: repeat(7, 0.72rem); gap: 0.22rem; }
 .leetcode-month-slot.month-gap, .leetcode-week.month-gap { margin-right: 1rem; }
 .leetcode-cell { display: block; border-radius: 0.18rem; background: #3a3a3a; }

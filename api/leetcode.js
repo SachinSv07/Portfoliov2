@@ -54,7 +54,8 @@ function buildActivity(calendar) {
     maxStreak = Math.max(maxStreak, currentStreak)
   })
 
-  return { activity, months, submissions: counts.reduce((total, count) => total + count, 0), activeDays: counts.filter(Boolean).length, maxStreak }
+  const monthSpans = months.map((month, index) => ({ ...month, span: (months[index + 1]?.column ?? 54) - month.column }))
+  return { activity, months: monthSpans, submissions: counts.reduce((total, count) => total + count, 0), activeDays: counts.filter(Boolean).length, maxStreak }
 }
 
 export default async function handler(request, response) {
